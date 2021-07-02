@@ -6,13 +6,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using RemoteNotes.Application;
 using RemoteNotes.Application.Common.Mappings;
 using RemoteNotes.Application.Interfaces;
 using RemoteNotes.Persistence;
 using RemoteNotes.WebApi.Middleware;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace RemoteNotes.WebApi
 {
@@ -21,7 +24,7 @@ namespace RemoteNotes.WebApi
         public IConfiguration Configuration { get; set; }
 
         public Startup(IConfiguration configuration) => Configuration = configuration;
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(config =>
@@ -55,16 +58,14 @@ namespace RemoteNotes.WebApi
                     options.Audience = "RemoteNotesWebAPI";
                     options.RequireHttpsMetadata = false;
                 });
-            
-            services.AddSwaggerGen(config =>
-            {
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                config.IncludeXmlComments(xmlPath);
-            });
+
+            services.AddVersionedApiExplorer(options => options.GroupNameFormat = "'v'VVV");
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+            services.AddSwaggerGen();
+            services.AddApiVersioning();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -74,8 +75,12 @@ namespace RemoteNotes.WebApi
             app.UseSwagger();
             app.UseSwaggerUI(config =>
             {
-                config.RoutePrefix = String.Empty;
-                config.SwaggerEndpoint("swagger/v1/swagger.json", "RemoteNotes API");
+                foreach (var description in provider.ApiVersionDescriptions)
+                {
+                    config.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                        description.GroupName.ToUpperInvariant());
+                    config.RoutePrefix = String.Empty;
+                }
             });
             app.UseCustomExceptionHandler();
             app.UseRouting();
@@ -83,11 +88,9 @@ namespace RemoteNotes.WebApi
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseApiVersioning();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

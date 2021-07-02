@@ -13,14 +13,16 @@ using RemoteNotes.WebApi.Models;
 
 namespace RemoteNotes.WebApi.Controllers
 {
+    [ApiVersion("1.0")]
+    [ApiVersion("2.0")]
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Route("api/{version:apiVersion}/[controller]")]
     public class NoteController : BaseController
     {
         private readonly IMapper _mapper;
 
         public NoteController(IMapper mapper) => _mapper = mapper;
-        
+
         /// <summary>
         /// Gets the list of notes
         /// </summary>
@@ -97,7 +99,7 @@ namespace RemoteNotes.WebApi.Controllers
             var noteId = await Mediator.Send(command);
             return Ok(noteId);
         }
-        
+
         /// <summary>
         /// Updates the note
         /// </summary>

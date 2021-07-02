@@ -73,4 +73,5 @@ or from IDE:
 [IdentityServer4 - Пишем свой сервис авторизации. Конфигурация](https://www.youtube.com/watch?v=9a_c-9MJwt8&t=418s)  
 [IdentityServer4 - логин и регистрация пользователя](https://www.youtube.com/watch?v=KNt1V72ZRAY)  
 [Unit-тесты в .NET с использованием xUnit](https://www.youtube.com/watch?v=C9HJr2XMmDo&t=15s)  
-[Swagger - автодокументирование кода](https://www.youtube.com/watch?v=pTsZQlZ1bts)
+[Swagger - автодокументирование кода](https://www.youtube.com/watch?v=pTsZQlZ1bts)  
+[Версионирование API - поддержка нескольких версий](https://www.youtube.com/watch?v=EaUUoBATz3Y)
